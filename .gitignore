@@ -36,7 +36,7 @@
 tags
 
 # iptables files
-iptables-*
+iptables-*.tar.bz2
 iptables-*/
 
 # kernel module files
