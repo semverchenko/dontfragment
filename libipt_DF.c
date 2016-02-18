@@ -23,8 +23,8 @@ static const struct xt_option_entry DF_opts[] = {
 static void DF_help(void)
 {
 	printf("DF options:\n"
-			"	--set set DF bit\n"
-			"	--reset reset DF bit\n");
+			"  --set  \tset DF bit\n"
+			"  --reset\treset DF bit\n");
 }
 
 static void DF_parse(struct xt_option_call *cb)
@@ -86,7 +86,7 @@ static void DF_print(const void *ip, const struct xt_entry_target *target, int n
 static struct xtables_target df_tg_reg = {
 	.name          = "DF",
 	.version       = XTABLES_VERSION,
-	.family        = AF_INET,
+	.family        = NFPROTO_IPV4,
 	.size          = XT_ALIGN(sizeof(struct xt_df_tginfo)),
 	.userspacesize = XT_ALIGN(sizeof(struct xt_df_tginfo)),
 	.help          = DF_help,

@@ -12,11 +12,6 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 static int df_tg_check(const struct xt_tgchk_param *param)
 {
-	if (strcmp(param->table, "mangle"))
-	{
-		printk(KERN_WARNING "df is called from table %s; call df only from mangle table\n", param->table);
-		return -EINVAL;
-	}
 	return 0;
 }
 
@@ -52,6 +47,7 @@ static struct xt_target ipt_df = {
 	.name = "DF",
 	.target = df_tg,
 	.table = "mangle",
+	.family = NFPROTO_IPV4,
 	.targetsize = sizeof(struct xt_df_tginfo),
 	.checkentry = df_tg_check,
 	.me = THIS_MODULE,
