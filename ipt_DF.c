@@ -17,6 +17,7 @@ static int df_tg_check(const struct xt_tgchk_param *param)
 
 static unsigned int df_tg(struct sk_buff *skb, const struct xt_action_param *param)
 {
+	__u32 check;
 	struct iphdr *iph = ip_hdr(skb);
 	df_mode mode = ((struct xt_df_tginfo *)(param->targinfo))->mode;
 
@@ -26,20 +27,24 @@ static unsigned int df_tg(struct sk_buff *skb, const struct xt_action_param *par
 	}
 
 	if ((mode == IPT_DF_SET   &&  (iph->frag_off & htons(IP_DF))) ||
-			(mode == IPT_DF_RESET && !(iph->frag_off & htons(IP_DF))))
+	    (mode == IPT_DF_RESET && !(iph->frag_off & htons(IP_DF))))
 		return XT_CONTINUE;
 
-	if (mode == IPT_DF_SET)
+	check = ntohs((__force __be16)iph->check);
+	if (mode == IPT_DF_SET) {
 		iph->frag_off |= htons(IP_DF);
-	else if (mode == IPT_DF_RESET)
+		check -= IP_DF;
+		check += check >> 16;
+	} else if (mode == IPT_DF_RESET) {
 		iph->frag_off &= ~htons(IP_DF);
-	else {
+		check += IP_DF;
+		check += check >> 16;
+	} else {
 		/* printk(KERN_WARNING "unknown DF mode %u; doing nothing\n", (int)mode); */
 		return XT_CONTINUE;
 	}
 
-	ip_send_check(iph);
-
+	iph->check = (__force __sum16) htons(check);
 	return XT_CONTINUE;
 }
 
