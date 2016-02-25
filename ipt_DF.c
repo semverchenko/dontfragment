@@ -20,30 +20,30 @@ static unsigned int df_tg(struct sk_buff *skb, const struct xt_action_param *par
 	__u32 check;
 	struct iphdr *iph = ip_hdr(skb);
 	df_mode mode = ((struct xt_df_tginfo *)(param->targinfo))->mode;
+	__u16 old_frag_off, new_frag_off;
 
 	if (!skb_make_writable(skb, skb->len)){
 		printk(KERN_ERR "DF: Error making skb writable\n");
 		return NF_DROP;
 	}
 
-	if ((mode == IPT_DF_SET   &&  (iph->frag_off & htons(IP_DF))) ||
-	    (mode == IPT_DF_RESET && !(iph->frag_off & htons(IP_DF))))
+	new_frag_off = old_frag_off = ntohs(iph->frag_off);
+
+	if (mode == IPT_DF_SET)
+		new_frag_off |= IP_DF;
+	else if (mode == IPT_DF_RESET)
+		new_frag_off &= ~IP_DF;
+
+	if (old_frag_off == new_frag_off)
 		return XT_CONTINUE;
 
 	check = ntohs((__force __be16)iph->check);
-	if (mode == IPT_DF_SET) {
-		iph->frag_off |= htons(IP_DF);
-		check -= IP_DF;
-		check += check >> 16;
-	} else if (mode == IPT_DF_RESET) {
-		iph->frag_off &= ~htons(IP_DF);
-		check += IP_DF;
-		check += check >> 16;
-	} else {
-		/* printk(KERN_WARNING "unknown DF mode %u; doing nothing\n", (int)mode); */
-		return XT_CONTINUE;
-	}
+	check += old_frag_off;
+	if ((check + 1) >> 16) check = (check + 1) & 0xffff;
+	check -= new_frag_off;
+	check += check >> 16;
 
+	iph->frag_off = ntohs(new_frag_off);
 	iph->check = (__force __sum16) htons(check);
 	return XT_CONTINUE;
 }
