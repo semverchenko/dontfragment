@@ -18,7 +18,7 @@ iptables-$(IPTABLES_VERSION).tar.bz2:
 kernel-module:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
-iptables-module: iptables ipt_DF.c
+iptables-module: iptables libipt_DF.c
 	$(CC) $(CFLAGS) $(IPT_CFLAGS) -I iptables-$(IPTABLES_VERSION)/include libipt_DF.c -c
 	$(CC) $(CFLAGS) $(IPT_CFLAGS) -shared -o libipt_DF.so libipt_DF.o
 
