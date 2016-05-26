@@ -10,7 +10,7 @@ Usage
 1. modprobe x_tables
 2. insmod ipt_DF.ko
 3. Put libipt_DF.so to your iptables dynamic libraries folder (usually /lib/[ip,x]tables or /usr/lib/[ip,x]tables)
-4. iptables -m mangle -A [PREROUTING/POSTROUTING] -j DF [--set|--reset]
+4. iptables -t mangle -A [PREROUTING/POSTROUTING] -j DF [--set|--reset]
 
 License
 -------
